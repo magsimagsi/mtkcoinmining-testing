@@ -3,300 +3,483 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MTK Miner - Real Test Tokens</title>
+    <title>MTK Coin Miner - Complete Game</title>
     <style>
         :root {
             --primary: #f8c555;
+            --primary-dark: #e6b142;
             --success: #2ed573;
             --warning: #ffa502;
             --error: #ff4757;
             --info: #1e90ff;
+            --dark-bg: #1a1a2e;
+            --darker-bg: #16213e;
+            --card-bg: rgba(0, 0, 0, 0.7);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .card { background: rgba(0,0,0,0.7); border-radius: 15px; padding: 25px; margin-bottom: 20px; }
-        h1 { text-align: center; margin-bottom: 30px; color: var(--primary); }
-        h2 { color: var(--primary); margin-bottom: 20px; }
-        .btn { background: var(--primary); color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 10px 5px; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-success { background: var(--success); }
-        .btn-info { background: var(--info); }
-        .btn-warning { background: var(--warning); }
-        .info-box { background: rgba(248,197,85,0.1); border: 2px solid var(--primary); border-radius: 10px; padding: 15px; margin: 15px 0; }
-        .faucet-list { display: grid; gap: 15px; margin: 20px 0; }
-        .faucet-item { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 15px; }
-        .token-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
-        .token-card { background: rgba(46,213,115,0.1); border: 2px solid var(--success); border-radius: 10px; padding: 15px; }
+        .container { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1fr 400px; gap: 20px; }
+        .section { background: var(--card-bg); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        h1 { text-align: center; margin-bottom: 20px; color: var(--primary); }
+        h2 { color: var(--primary); margin-bottom: 15px; }
+        h3 { color: var(--primary); margin: 10px 0; }
+        .game-container { background: var(--darker-bg); border: 3px solid var(--primary); border-radius: 10px; overflow: hidden; margin-bottom: 20px; aspect-ratio: 16/9; }
+        #gameCanvas { width: 100%; height: 100%; display: block; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; }
+        .stat-card { background: rgba(248,197,85,0.15); border-radius: 8px; padding: 15px; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: var(--primary); }
+        .stat-label { font-size: 12px; color: #aaa; }
+        .controls-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .btn { background: linear-gradient(45deg, var(--primary), var(--primary-dark)); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-success { background: linear-gradient(45deg, var(--success), #25c164); }
+        .btn-warning { background: linear-gradient(45deg, var(--warning), #e59400); }
+        .btn-info { background: linear-gradient(45deg, var(--info), #187bcd); }
+        .wallet-card { background: rgba(248,197,85,0.1); border: 2px solid var(--primary); border-radius: 10px; padding: 15px; margin: 15px 0; }
+        .info-item { display: flex; justify-content: space-between; margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 5px; }
+        .label { color: var(--primary); font-weight: bold; }
+        .value { font-family: monospace; }
+        input { padding: 10px; border-radius: 5px; border: 2px solid var(--primary); background: rgba(255,255,255,0.05); color: white; width: 100%; margin: 5px 0; }
+        .faucet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
+        .faucet-card { background: rgba(46,213,115,0.1); border: 2px solid var(--success); border-radius: 10px; padding: 15px; }
         .notification { position: fixed; top: 20px; right: 20px; padding: 15px 25px; background: var(--primary); color: #000; border-radius: 8px; font-weight: bold; transform: translateX(150%); transition: transform 0.3s; z-index: 1000; }
         .notification.show { transform: translateX(0); }
         .hidden { display: none; }
-        .step { display: flex; align-items: center; margin: 15px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; }
-        .step-number { background: var(--primary); color: #000; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold; }
+        .mine-spot { position: absolute; width: 20px; height: 20px; background: var(--primary); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 
+            0% { transform: scale(1); opacity: 0.8; } 
+            50% { transform: scale(1.2); opacity: 1; } 
+            100% { transform: scale(1); opacity: 0.8; } 
+        }
     </style>
 </head>
 <body>
+    <h1>⛏️ MTK Coin Miner - Complete Game</h1>
+    
     <div class="container">
-        <h1>🪙 Get Real Test Tokens on Sepolia</h1>
+        <!-- LEFT COLUMN: GAME -->
+        <div>
+            <div class="section">
+                <h2>🎮 Mining Game</h2>
+                <div class="game-container">
+                    <canvas id="gameCanvas"></canvas>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="score">0</div>
+                        <div class="stat-label">MTK Mined</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="multiplier">1x</div>
+                        <div class="stat-label">Mining Power</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="miners">1</div>
+                        <div class="stat-label">Active Miners</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="speed">1.0</div>
+                        <div class="stat-label">Mining Speed</div>
+                    </div>
+                </div>
+                
+                <div class="controls-grid">
+                    <button class="btn" onclick="upgradeMiningPower()">⬆️ Upgrade Power (100 MTK)</button>
+                    <button class="btn" onclick="buyMiner()">👷 Buy Miner (500 MTK)</button>
+                    <button class="btn" onclick="upgradeSpeed()">⚡ Increase Speed (250 MTK)</button>
+                    <button class="btn btn-success" onclick="claimTokens()">💰 Claim MTK Tokens</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📊 Game Statistics</h2>
+                <div class="wallet-card">
+                    <div class="info-item">
+                        <span class="label">Total Mined</span>
+                        <span class="value" id="totalMined">0 MTK</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Total Claimed</span>
+                        <span class="value" id="totalClaimed">0 MTK</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Total Withdrawn</span>
+                        <span class="value" id="totalWithdrawn">0 MTK</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Game Balance</span>
+                        <span class="value" id="gameBalance">0 MTK</span>
+                    </div>
+                </div>
+            </div>
+        </div>
         
-        <!-- Connection Status -->
-        <div class="card">
-            <h2>🔗 Wallet Connection</h2>
-            <div class="info-box">
-                <div style="display: flex; justify-content: space-between; margin: 10px 0;">
-                    <span style="color: var(--primary); font-weight: bold;">Status:</span>
-                    <span id="walletStatus" style="font-family: monospace;">Not Connected</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin: 10px 0;">
-                    <span style="color: var(--primary); font-weight: bold;">Account:</span>
-                    <span id="accountAddress" style="font-family: monospace;">-</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin: 10px 0;">
-                    <span style="color: var(--primary); font-weight: bold;">Network:</span>
-                    <span id="networkInfo" style="font-family: monospace;">-</span>
-                </div>
-                <button class="btn" onclick="connectWallet()" id="connectBtn" style="width: 100%; margin-top: 15px;">
-                    🔗 Connect MetaMask
-                </button>
-            </div>
-        </div>
-
-        <!-- Step-by-Step Guide -->
-        <div class="card">
-            <h2>📋 Step-by-Step Guide</h2>
-            
-            <div class="step">
-                <div class="step-number">1</div>
-                <div>
-                    <strong>Connect Wallet & Switch to Sepolia</strong>
-                    <div style="color: #aaa; font-size: 14px; margin-top: 5px;">Make sure you're on Sepolia Test Network</div>
-                </div>
-            </div>
-            
-            <div class="step">
-                <div class="step-number">2</div>
-                <div>
-                    <strong>Get Sepolia ETH (Free)</strong>
-                    <div style="color: #aaa; font-size: 14px; margin-top: 5px;">You need ETH for gas fees</div>
-                </div>
-            </div>
-            
-            <div class="step">
-                <div class="step-number">3</div>
-                <div>
-                    <strong>Get Test Tokens (Free)</strong>
-                    <div style="color: #aaa; font-size: 14px; margin-top: 5px;">Choose from the faucets below</div>
-                </div>
-            </div>
-            
-            <div class="step">
-                <div class="step-number">4</div>
-                <div>
-                    <strong>Start Mining & Withdrawing</strong>
-                    <div style="color: #aaa; font-size: 14px; margin-top: 5px;">Test withdrawals with real tokens</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ETH Faucets -->
-        <div class="card">
-            <h2>⛽ ETH Faucets (Get Free Sepolia ETH)</h2>
-            <div class="faucet-list">
-                <div class="faucet-item">
-                    <h3 style="color: var(--success);">1. Alchemy Sepolia Faucet</h3>
-                    <p style="margin: 10px 0; color: #aaa;">Best faucet - requires Alchemy account (free)</p>
-                    <button class="btn btn-success" onclick="window.open('https://sepoliafaucet.com', '_blank')">
-                        🚀 Go to Alchemy Faucet
-                    </button>
-                    <div style="margin-top: 10px; font-size: 14px; color: var(--primary);">
-                        ✅ Get 0.5 ETH every 24 hours
-                    </div>
-                </div>
+        <!-- RIGHT COLUMN: WALLET & FAUCETS -->
+        <div>
+            <div class="section">
+                <h2>👛 Wallet & Blockchain</h2>
                 
-                <div class="faucet-item">
-                    <h3 style="color: var(--info);">2. Infura Sepolia Faucet</h3>
-                    <p style="margin: 10px 0; color: #aaa;">Infura account required (free)</p>
-                    <button class="btn btn-info" onclick="window.open('https://www.infura.io/faucet/sepolia', '_blank')">
-                        💧 Go to Infura Faucet
+                <div class="wallet-card">
+                    <div class="info-item">
+                        <span class="label">Status</span>
+                        <span class="value" id="walletStatus">Not Connected</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Account</span>
+                        <span class="value" id="accountAddress">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Network</span>
+                        <span class="value" id="network">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">ETH Balance</span>
+                        <span class="value" id="ethBalance">0 ETH</span>
+                    </div>
+                    <button class="btn" onclick="connectWallet()" id="connectBtn" style="width: 100%; margin-top: 10px;">
+                        🔗 Connect MetaMask
                     </button>
                 </div>
                 
-                <div class="faucet-item">
-                    <h3 style="color: var(--warning);">3. QuickNode Faucet</h3>
-                    <p style="margin: 10px 0; color: #aaa;">Twitter verification required</p>
-                    <button class="btn btn-warning" onclick="window.open('https://faucet.quicknode.com/ethereum/sepolia', '_blank')">
-                        ⚡ Go to QuickNode Faucet
-                    </button>
-                </div>
-            </div>
-            
-            <div class="info-box">
-                <strong>💡 Tips:</strong>
-                <ul style="margin: 10px 0 0 20px; color: #aaa;">
-                    <li>Alchemy faucet is most reliable</li>
-                    <li>You need ETH for gas fees (0.1 ETH is enough for testing)</li>
-                    <li>Faucets have daily limits</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Test Token Faucets -->
-        <div class="card">
-            <h2>🪙 Test Token Faucets (Get Real ERC20 Tokens)</h2>
-            
-            <div class="token-grid">
-                <div class="token-card">
-                    <h3 style="color: var(--success);">UNI Token</h3>
-                    <p style="margin: 10px 0; color: #aaa; font-size: 14px;">Uniswap Governance Token</p>
-                    <div style="font-family: monospace; font-size: 12px; color: var(--primary); margin: 5px 0;">
-                        Contract: 0x1f984...BDADdC4201F984
+                <!-- Claim Section -->
+                <div class="wallet-card" style="background: rgba(46,213,115,0.1); border-color: var(--success);">
+                    <h3 style="color: var(--success);">💰 Claim Game Tokens</h3>
+                    <div class="info-item">
+                        <span class="label">Claimable</span>
+                        <span class="value" id="claimableBalance">0 MTK</span>
                     </div>
-                    <button class="btn btn-success" onclick="getUniTokens()">
-                        🎁 Get UNI Tokens
+                    <button class="btn btn-success" onclick="estimateClaimGas()" style="width: 100%; margin-top: 10px;">
+                        💰 Claim to Wallet
                     </button>
                 </div>
                 
-                <div class="token-card">
-                    <h3 style="color: var(--info);">LINK Token</h3>
-                    <p style="margin: 10px 0; color: #aaa; font-size: 14px;">Chainlink Oracle Token</p>
-                    <div style="font-family: monospace; font-size: 12px; color: var(--primary); margin: 5px 0;">
-                        Contract: 0x779877...0cF956
+                <!-- Withdrawal Section -->
+                <div class="wallet-card" style="background: rgba(255,159,67,0.1); border-color: var(--warning);">
+                    <h3 style="color: var(--warning);">🏦 Withdraw Tokens</h3>
+                    <div class="info-item">
+                        <span class="label">Wallet Balance</span>
+                        <span class="value" id="walletTokenBalance">0 MTK</span>
                     </div>
-                    <button class="btn btn-info" onclick="getLinkTokens()">
-                        🔗 Get LINK Tokens
-                    </button>
-                </div>
-                
-                <div class="token-card">
-                    <h3 style="color: var(--warning);">DAI Token</h3>
-                    <p style="margin: 10px 0; color: #aaa; font-size: 14px;">Stablecoin Test Token</p>
-                    <div style="font-family: monospace; font-size: 12px; color: var(--primary); margin: 5px 0;">
-                        Contract: 0x3e622...C620C5d6
-                    </div>
-                    <button class="btn btn-warning" onclick="getDaiTokens()">
-                        💰 Get DAI Tokens
+                    <input type="number" id="withdrawAmount" placeholder="Amount to withdraw" value="10" min="1">
+                    <input type="text" id="recipientAddress" placeholder="Recipient address (0x...)" value="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266">
+                    <button class="btn btn-warning" onclick="estimateWithdrawGas()" style="width: 100%; margin-top: 10px;">
+                        🏦 Withdraw Tokens
                     </button>
                 </div>
             </div>
             
-            <div class="info-box">
-                <strong>📝 How to Get Test Tokens:</strong>
-                <ol style="margin: 10px 0 0 20px; color: #aaa;">
-                    <li>First get Sepolia ETH (from faucets above)</li>
-                    <li>Go to Uniswap on Sepolia: <a href="https://app.uniswap.org" style="color: var(--primary);" target="_blank">app.uniswap.org</a></li>
-                    <li>Connect your wallet (make sure it's on Sepolia)</li>
-                    <li>Swap ETH for UNI, LINK, or other tokens</li>
-                    <li>Use small amounts (0.01 ETH) for testing</li>
-                </ol>
-            </div>
-        </div>
-
-        <!-- Token Withdrawal Test -->
-        <div class="card">
-            <h2>💸 Test Token Withdrawal</h2>
-            <div id="withdrawalSection" class="hidden">
-                <div class="info-box">
-                    <div style="display: flex; justify-content: space-between; margin: 10px 0;">
-                        <span style="color: var(--primary); font-weight: bold;">Selected Token:</span>
-                        <span id="selectedToken" style="font-family: monospace;">-</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin: 10px 0;">
-                        <span style="color: var(--primary); font-weight: bold;">Your Balance:</span>
-                        <span id="tokenBalance" style="font-family: monospace;">0 tokens</span>
+            <!-- FAUCETS SECTION -->
+            <div class="section">
+                <h2>🚀 Get Real Test Tokens</h2>
+                
+                <!-- ETH Faucets -->
+                <div class="faucet-card">
+                    <h3>⛽ Get Sepolia ETH (Free)</h3>
+                    <p style="color: #aaa; margin: 10px 0; font-size: 14px;">Need ETH for gas fees</p>
+                    <button class="btn btn-info" onclick="window.open('https://sepoliafaucet.com', '_blank')" style="width: 100%; margin: 5px 0;">
+                        🚀 Alchemy Faucet (0.5 ETH/day)
+                    </button>
+                    <button class="btn btn-info" onclick="window.open('https://www.infura.io/faucet/sepolia', '_blank')" style="width: 100%; margin: 5px 0;">
+                        💧 Infura Faucet
+                    </button>
+                </div>
+                
+                <!-- Token Faucets -->
+                <div class="faucet-grid">
+                    <div class="faucet-card">
+                        <h3>🪙 Get UNI Tokens</h3>
+                        <p style="color: #aaa; font-size: 12px;">Uniswap token</p>
+                        <button class="btn btn-success" onclick="getUniTokens()" style="width: 100%; margin-top: 10px;">
+                            🎁 Get UNI
+                        </button>
                     </div>
                     
-                    <div style="margin: 15px 0;">
-                        <label style="color: var(--primary); font-weight: bold; display: block; margin-bottom: 5px;">Withdraw Amount</label>
-                        <input type="number" id="withdrawAmount" placeholder="Enter amount" value="1" min="0.1" step="0.1" style="width: 100%; padding: 10px; border-radius: 5px; border: 2px solid var(--primary); background: rgba(255,255,255,0.05); color: white;">
+                    <div class="faucet-card">
+                        <h3>🔗 Get LINK Tokens</h3>
+                        <p style="color: #aaa; font-size: 12px;">Chainlink token</p>
+                        <button class="btn btn-success" onclick="getLinkTokens()" style="width: 100%; margin-top: 10px;">
+                            🎁 Get LINK
+                        </button>
                     </div>
-                    
-                    <div style="margin: 15px 0;">
-                        <label style="color: var(--primary); font-weight: bold; display: block; margin-bottom: 5px;">Recipient Address</label>
-                        <input type="text" id="recipientAddress" placeholder="0x..." value="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" style="width: 100%; padding: 10px; border-radius: 5px; border: 2px solid var(--primary); background: rgba(255,255,255,0.05); color: white;">
-                        <div style="font-size: 12px; color: #aaa; margin-top: 5px;">
-                            Test address (Hardhat default) or enter your own
-                        </div>
-                    </div>
-                    
-                    <button class="btn btn-success" onclick="testWithdrawal()" style="width: 100%;">
-                        🧪 Test Withdrawal
-                    </button>
                 </div>
-            </div>
-            <div id="connectFirstMessage" style="text-align: center; padding: 20px; color: #aaa;">
-                Connect your wallet to test withdrawals
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="card">
-            <h2>⚡ Quick Actions</h2>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
-                <button class="btn" onclick="switchToSepolia()">
-                    🔄 Switch to Sepolia
-                </button>
-                <button class="btn btn-info" onclick="copyAddress()">
-                    📋 Copy My Address
-                </button>
-                <button class="btn btn-success" onclick="checkBalances()">
-                    💰 Check All Balances
-                </button>
-                <button class="btn btn-warning" onclick="openUniswap()">
-                    🔄 Open Uniswap
-                </button>
+                
+                <div class="wallet-card" style="margin-top: 15px;">
+                    <h3>📝 How to Get Tokens:</h3>
+                    <ol style="margin: 10px 0 0 20px; color: #aaa; font-size: 14px;">
+                        <li>Get Sepolia ETH from faucet</li>
+                        <li>Go to Uniswap: app.uniswap.org</li>
+                        <li>Swap ETH for UNI/LINK tokens</li>
+                        <li>Use tokens to test withdrawals</li>
+                    </ol>
+                </div>
             </div>
         </div>
     </div>
-
+    
     <!-- Notifications -->
     <div class="notification" id="notification"></div>
 
     <script>
         // ============================================
-        // CONFIGURATION
+        // GAME VARIABLES
         // ============================================
-        const TOKENS = {
-            UNI: {
-                address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
-                name: 'Uniswap',
-                symbol: 'UNI',
-                decimals: 18,
-                faucet: 'https://app.uniswap.org/swap'
-            },
-            LINK: {
-                address: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
-                name: 'Chainlink',
-                symbol: 'LINK',
-                decimals: 18,
-                faucet: 'https://faucets.chain.link/sepolia'
-            },
-            DAI: {
-                address: '0x3e622317f8C93f7328350cF0B56d9eD4C620C5d6',
-                name: 'DAI Stablecoin',
-                symbol: 'DAI',
-                decimals: 18,
-                faucet: 'https://app.uniswap.org/swap'
-            },
-            USDC: {
-                address: '0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8',
-                name: 'USD Coin',
-                symbol: 'USDC',
-                decimals: 6,
-                faucet: 'https://app.uniswap.org/swap'
-            }
-        };
-
+        let score = 0;
+        let miningPower = 1;
+        let miners = 1;
+        let miningSpeed = 1.0;
+        let gameInterval;
+        let mineSpots = [];
+        let totalMined = 0;
+        let totalClaimed = 0;
+        let totalWithdrawn = 0;
+        let claimableBalance = 0;
+        let walletTokenBalance = 0;
+        
         // ============================================
-        // WALLET CONNECTION
+        // BLOCKCHAIN VARIABLES
         // ============================================
         let web3 = null;
         let userAccount = null;
         let connected = false;
-        let selectedToken = TOKENS.UNI;
+        let selectedToken = {
+            address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', // UNI token
+            name: 'Uniswap',
+            symbol: 'UNI',
+            decimals: 18
+        };
 
+        // ============================================
+        // GAME FUNCTIONS
+        // ============================================
+        function initGame() {
+            const canvas = document.getElementById('gameCanvas');
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            createMineSpots(canvas);
+            gameInterval = setInterval(() => updateGame(canvas), 1000 / miningSpeed);
+            updateGameUI();
+        }
+
+        function createMineSpots(canvas) {
+            mineSpots = [];
+            for (let i = 0; i < 5; i++) {
+                mineSpots.push({
+                    x: Math.random() * (canvas.width - 40) + 20,
+                    y: Math.random() * (canvas.height - 40) + 20,
+                    active: true
+                });
+            }
+        }
+
+        function updateGame(canvas) {
+            const ctx = canvas.getContext('2d');
+            
+            // Draw background
+            ctx.fillStyle = '#16213e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw mine spots
+            mineSpots.forEach(spot => {
+                if (spot.active) {
+                    ctx.fillStyle = '#f8c555';
+                    ctx.beginPath();
+                    ctx.arc(spot.x, spot.y, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Glow effect
+                    ctx.shadowColor = '#f8c555';
+                    ctx.shadowBlur = 20;
+                    ctx.beginPath();
+                    ctx.arc(spot.x, spot.y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            });
+            
+            // Auto mining
+            mineSpots.forEach(spot => {
+                if (spot.active && Math.random() < 0.3) {
+                    const mined = miningPower * miners;
+                    score += mined;
+                    totalMined += mined;
+                    claimableBalance += mined;
+                    updateGameUI();
+                    
+                    // Show particle effect
+                    showParticle(spot.x, spot.y);
+                }
+            });
+        }
+
+        function showParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'mine-spot';
+            particle.style.left = (x - 10) + 'px';
+            particle.style.top = (y - 10) + 'px';
+            document.querySelector('.game-container').appendChild(particle);
+            
+            setTimeout(() => particle.remove(), 1000);
+        }
+
+        // Canvas click handler
+        const canvas = document.getElementById('gameCanvas');
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            mineSpots.forEach(spot => {
+                const distance = Math.sqrt((x - spot.x) ** 2 + (y - spot.y) ** 2);
+                if (distance < 20 && spot.active) {
+                    const minedAmount = miningPower * 10;
+                    score += minedAmount;
+                    totalMined += minedAmount;
+                    claimableBalance += minedAmount;
+                    
+                    spot.active = false;
+                    setTimeout(() => {
+                        spot.active = true;
+                        spot.x = Math.random() * (canvas.width - 40) + 20;
+                        spot.y = Math.random() * (canvas.height - 40) + 20;
+                    }, 1000);
+                    
+                    updateGameUI();
+                    showNotification(`+${minedAmount} MTK mined!`, 'success');
+                    
+                    // Show multiple particles
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => {
+                            showParticle(spot.x + Math.random() * 30 - 15, spot.y + Math.random() * 30 - 15);
+                        }, i * 100);
+                    }
+                }
+            });
+        });
+
+        function upgradeMiningPower() {
+            if (score >= 100) {
+                score -= 100;
+                miningPower++;
+                updateGameUI();
+                showNotification('Mining power upgraded!', 'success');
+            } else {
+                showNotification('Not enough MTK!', 'error');
+            }
+        }
+
+        function buyMiner() {
+            if (score >= 500) {
+                score -= 500;
+                miners++;
+                updateGameUI();
+                showNotification('New miner purchased!', 'success');
+            } else {
+                showNotification('Not enough MTK!', 'error');
+            }
+        }
+
+        function upgradeSpeed() {
+            if (score >= 250) {
+                score -= 250;
+                miningSpeed += 0.5;
+                clearInterval(gameInterval);
+                gameInterval = setInterval(() => updateGame(canvas), 1000 / miningSpeed);
+                updateGameUI();
+                showNotification('Mining speed increased!', 'success');
+            } else {
+                showNotification('Not enough MTK!', 'error');
+            }
+        }
+
+        function updateGameUI() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('multiplier').textContent = `${miningPower}x`;
+            document.getElementById('miners').textContent = miners;
+            document.getElementById('speed').textContent = miningSpeed.toFixed(1);
+            document.getElementById('totalMined').textContent = `${totalMined} MTK`;
+            document.getElementById('totalClaimed').textContent = `${totalClaimed} MTK`;
+            document.getElementById('totalWithdrawn').textContent = `${totalWithdrawn} MTK`;
+            document.getElementById('gameBalance').textContent = `${score} MTK`;
+            document.getElementById('claimableBalance').textContent = `${claimableBalance} MTK`;
+            document.getElementById('walletTokenBalance').textContent = `${walletTokenBalance} MTK`;
+        }
+
+        // ============================================
+        // CLAIMING FUNCTIONS
+        // ============================================
+        async function claimTokens() {
+            if (claimableBalance <= 0) {
+                showNotification('No tokens to claim!', 'error');
+                return;
+            }
+            
+            // In real implementation, this would mint tokens on blockchain
+            // For demo, we simulate claiming
+            
+            const claimedAmount = claimableBalance;
+            walletTokenBalance += claimedAmount;
+            totalClaimed += claimedAmount;
+            claimableBalance = 0;
+            score = 0;
+            
+            updateGameUI();
+            showNotification(`✅ Claimed ${claimedAmount} MTK to wallet!`, 'success');
+        }
+
+        async function estimateClaimGas() {
+            if (!connected) {
+                showNotification('Connect wallet first!', 'error');
+                return;
+            }
+            
+            if (claimableBalance <= 0) {
+                showNotification('No tokens to claim!', 'error');
+                return;
+            }
+            
+            showNotification('Gas estimation would show here', 'info');
+        }
+
+        // ============================================
+        // WITHDRAWAL FUNCTIONS
+        // ============================================
+        async function estimateWithdrawGas() {
+            if (!connected || !web3) {
+                showNotification('Connect wallet first!', 'error');
+                return;
+            }
+            
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const recipient = document.getElementById('recipientAddress').value.trim();
+            
+            if (!amount || amount <= 0) {
+                showNotification('Enter valid amount', 'error');
+                return;
+            }
+            
+            if (!recipient || !web3.utils.isAddress(recipient)) {
+                showNotification('Enter valid address', 'error');
+                return;
+            }
+            
+            if (walletTokenBalance < amount) {
+                showNotification(`Insufficient balance! You have ${walletTokenBalance} MTK`, 'error');
+                return;
+            }
+            
+            // In real implementation, this would estimate gas
+            showNotification(`Would withdraw ${amount} MTK to ${recipient.substring(0, 10)}...`, 'info');
+        }
+
+        // ============================================
+        // WALLET CONNECTION
+        // ============================================
         async function connectWallet() {
             try {
                 if (typeof window.ethereum === 'undefined') {
-                    showNotification('Please install MetaMask!', 'error');
+                    showNotification('Install MetaMask first!', 'error');
                     return;
                 }
 
@@ -305,14 +488,13 @@
                 });
                 
                 if (accounts.length === 0) {
-                    showNotification('Please unlock MetaMask!', 'error');
+                    showNotification('Unlock MetaMask!', 'error');
                     return;
                 }
                 
                 userAccount = accounts[0];
                 web3 = new Web3(window.ethereum);
                 
-                // Check network
                 const chainId = await web3.eth.getChainId();
                 const isSepolia = chainId === 11155111;
                 
@@ -320,255 +502,73 @@
                 document.getElementById('walletStatus').textContent = 'Connected ✓';
                 document.getElementById('accountAddress').textContent = 
                     userAccount.substring(0, 6) + '...' + userAccount.substring(38);
-                document.getElementById('networkInfo').textContent = 
-                    isSepolia ? 'Sepolia ✓' : `Wrong Network (ID: ${chainId})`;
+                document.getElementById('network').textContent = 
+                    isSepolia ? 'Sepolia Testnet ✓' : `Network ${chainId}`;
                 
                 document.getElementById('connectBtn').textContent = '✅ Connected';
                 document.getElementById('connectBtn').disabled = true;
                 
                 connected = true;
                 
-                // Show withdrawal section
-                document.getElementById('withdrawalSection').classList.remove('hidden');
-                document.getElementById('connectFirstMessage').classList.add('hidden');
+                // Get ETH balance
+                await updateEthBalance();
                 
-                // Check balances
-                await checkBalances();
+                // Start game if not already started
+                if (!gameInterval) {
+                    initGame();
+                }
                 
-                showNotification('Wallet connected! Switch to Sepolia if not already.', 'success');
+                showNotification('Wallet connected!', 'success');
                 
                 if (!isSepolia) {
-                    showNotification('Please switch to Sepolia testnet!', 'warning');
+                    showNotification('Switch to Sepolia for test tokens', 'warning');
                 }
                 
             } catch (error) {
                 console.error('Connection error:', error);
-                showNotification('Connection failed: ' + error.message, 'error');
+                showNotification('Connection failed', 'error');
             }
         }
 
-        // ============================================
-        // NETWORK FUNCTIONS
-        // ============================================
-        async function switchToSepolia() {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0xaa36a7' }], // Sepolia
-                });
-                showNotification('Switched to Sepolia!', 'success');
-                setTimeout(() => location.reload(), 1000);
-            } catch (error) {
-                if (error.code === 4902) {
-                    // Add Sepolia network
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: '0xaa36a7',
-                            chainName: 'Sepolia Test Network',
-                            nativeCurrency: {
-                                name: 'Sepolia ETH',
-                                symbol: 'ETH',
-                                decimals: 18
-                            },
-                            rpcUrls: ['https://rpc.sepolia.org'],
-                            blockExplorerUrls: ['https://sepolia.etherscan.io']
-                        }]
-                    });
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showNotification('Failed to switch network: ' + error.message, 'error');
-                }
-            }
-        }
-
-        // ============================================
-        // TOKEN FUNCTIONS
-        // ============================================
-        async function checkBalances() {
+        async function updateEthBalance() {
             if (!connected || !web3) return;
             
             try {
-                showNotification('Checking balances...', 'info');
-                
-                // Check ETH balance
-                const ethBalance = await web3.eth.getBalance(userAccount);
-                const ethFormatted = web3.utils.fromWei(ethBalance, 'ether');
-                
-                // Check selected token balance
-                const tokenContract = new web3.eth.Contract(getERC20ABI(), selectedToken.address);
-                const tokenBalance = await tokenContract.methods.balanceOf(userAccount).call();
-                const decimals = await tokenContract.methods.decimals().call();
-                const tokenFormatted = tokenBalance / Math.pow(10, decimals);
-                
-                // Update UI
-                document.getElementById('selectedToken').textContent = 
-                    `${selectedToken.symbol} (${selectedToken.name})`;
-                document.getElementById('tokenBalance').textContent = 
-                    `${tokenFormatted.toFixed(4)} ${selectedToken.symbol}`;
-                
-                showNotification(`Balance: ${ethFormatted.substring(0, 6)} ETH, ${tokenFormatted.toFixed(2)} ${selectedToken.symbol}`, 'success');
-                
+                const balance = await web3.eth.getBalance(userAccount);
+                const ethFormatted = web3.utils.fromWei(balance, 'ether');
+                document.getElementById('ethBalance').textContent = 
+                    `${parseFloat(ethFormatted).toFixed(4)} ETH`;
             } catch (error) {
-                console.error('Balance check error:', error);
-                showNotification('Balance check failed', 'error');
+                console.error('Balance error:', error);
             }
         }
 
+        // ============================================
+        // FAUCET FUNCTIONS
+        // ============================================
         function getUniTokens() {
-            selectedToken = TOKENS.UNI;
-            showNotification('Selected UNI token. Get UNI on Uniswap!', 'info');
-            openUniswap();
+            if (!connected) {
+                showNotification('Connect wallet first!', 'error');
+                return;
+            }
+            
+            showNotification('🎁 To get UNI tokens: 1. Get ETH from faucet 2. Go to Uniswap 3. Swap ETH for UNI', 'info');
+            window.open('https://app.uniswap.org/swap', '_blank');
         }
 
         function getLinkTokens() {
-            selectedToken = TOKENS.LINK;
+            if (!connected) {
+                showNotification('Connect wallet first!', 'error');
+                return;
+            }
+            
+            showNotification('🔗 Opening Chainlink faucet...', 'info');
             window.open('https://faucets.chain.link/sepolia', '_blank');
-            showNotification('Opening Chainlink faucet for LINK tokens...', 'info');
-        }
-
-        function getDaiTokens() {
-            selectedToken = TOKENS.DAI;
-            showNotification('Selected DAI token. Get DAI on Uniswap!', 'info');
-            openUniswap();
-        }
-
-        function openUniswap() {
-            window.open('https://app.uniswap.org/swap', '_blank');
-            showNotification('Opening Uniswap. Connect wallet and swap ETH for tokens!', 'info');
-        }
-
-        // ============================================
-        // WITHDRAWAL TEST
-        // ============================================
-        async function testWithdrawal() {
-            if (!connected || !web3) {
-                showNotification('Please connect wallet first!', 'error');
-                return;
-            }
-            
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-            const recipient = document.getElementById('recipientAddress').value.trim();
-            
-            if (!amount || amount <= 0) {
-                showNotification('Please enter a valid amount', 'error');
-                return;
-            }
-            
-            if (!recipient || !web3.utils.isAddress(recipient)) {
-                showNotification('Please enter a valid recipient address', 'error');
-                return;
-            }
-            
-            try {
-                // Create token contract
-                const tokenContract = new web3.eth.Contract(getERC20ABI(), selectedToken.address);
-                
-                // Get decimals
-                const decimals = await tokenContract.methods.decimals().call();
-                const amountInWei = web3.utils.toWei(amount.toString(), 'ether');
-                
-                // Check balance
-                const balance = await tokenContract.methods.balanceOf(userAccount).call();
-                const balanceFormatted = balance / Math.pow(10, decimals);
-                
-                if (balanceFormatted < amount) {
-                    showNotification(`Insufficient ${selectedToken.symbol} balance! You have ${balanceFormatted.toFixed(4)}`, 'error');
-                    return;
-                }
-                
-                // Send transaction
-                showNotification(`Sending ${amount} ${selectedToken.symbol}...`, 'info');
-                
-                const tx = await tokenContract.methods.transfer(
-                    recipient, 
-                    amountInWei
-                ).send({ 
-                    from: userAccount,
-                    gas: 100000
-                });
-                
-                showNotification(`✅ Success! ${amount} ${selectedToken.symbol} sent!`, 'success');
-                
-                // Show transaction link
-                const explorerLink = `https://sepolia.etherscan.io/tx/${tx.transactionHash}`;
-                setTimeout(() => {
-                    showNotification(`View transaction on Etherscan`, 'info');
-                    console.log('Transaction:', explorerLink);
-                }, 2000);
-                
-                // Update balance
-                setTimeout(() => checkBalances(), 3000);
-                
-            } catch (error) {
-                console.error('Withdrawal error:', error);
-                
-                if (error.message.includes('insufficient funds')) {
-                    showNotification('Insufficient ETH for gas fees! Get more ETH from faucet.', 'error');
-                } else if (error.message.includes('rejected')) {
-                    showNotification('Transaction rejected by user', 'error');
-                } else {
-                    showNotification('Withdrawal failed: ' + error.message, 'error');
-                }
-            }
         }
 
         // ============================================
         // UTILITY FUNCTIONS
         // ============================================
-        function copyAddress() {
-            if (!userAccount) {
-                showNotification('Connect wallet first!', 'error');
-                return;
-            }
-            
-            navigator.clipboard.writeText(userAccount);
-            showNotification('Address copied to clipboard!', 'success');
-        }
-
-        function getERC20ABI() {
-            return [
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "name",
-                    "outputs": [{"name": "", "type": "string"}],
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "symbol",
-                    "outputs": [{"name": "", "type": "string"}],
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "decimals",
-                    "outputs": [{"name": "", "type": "uint8"}],
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [{"name": "_owner", "type": "address"}],
-                    "name": "balanceOf",
-                    "outputs": [{"name": "balance", "type": "uint256"}],
-                    "type": "function"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {"name": "_to", "type": "address"},
-                        {"name": "_value", "type": "uint256"}
-                    ],
-                    "name": "transfer",
-                    "outputs": [{"name": "success", "type": "bool"}],
-                    "type": "function"
-                }
-            ];
-        }
-
         function showNotification(message, type) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
@@ -587,26 +587,32 @@
             setTimeout(() => notification.classList.remove('show'), 3000);
         }
 
-        // Initialize
+        // ============================================
+        // INITIALIZE
+        // ============================================
         window.onload = function() {
-            // Check if already connected
+            // Start game immediately
+            initGame();
+            
+            // Check if already connected to MetaMask
             if (typeof window.ethereum !== 'undefined') {
                 window.ethereum.request({ method: 'eth_accounts' })
                     .then(accounts => {
                         if (accounts.length > 0) {
-                            connectWallet();
+                            // Auto-connect
+                            userAccount = accounts[0];
+                            web3 = new Web3(window.ethereum);
+                            connected = true;
+                            
+                            document.getElementById('walletStatus').textContent = 'Connected ✓';
+                            document.getElementById('accountAddress').textContent = 
+                                userAccount.substring(0, 6) + '...' + userAccount.substring(38);
+                            document.getElementById('connectBtn').textContent = '✅ Connected';
+                            document.getElementById('connectBtn').disabled = true;
+                            
+                            updateEthBalance();
                         }
                     });
-            }
-            
-            // Listen for account changes
-            if (window.ethereum) {
-                window.ethereum.on('accountsChanged', () => {
-                    location.reload();
-                });
-                window.ethereum.on('chainChanged', () => {
-                    location.reload();
-                });
             }
         };
     </script>
